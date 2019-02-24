@@ -1,0 +1,20 @@
+tush_start
+global PROMPT
+
+set test "Pipelining"
+
+send "ls -l | awk '{ print \$5 }'\n"
+set ls_awk_out [exec ls -l | awk "\{ print \$5 \}"]
+tush_compare_output $ls_awk_out "ls | awk"
+
+send "ps | wc -l\n"
+set ps_wc_out [exec ps | wc -l]
+# need to subtract 1 because we're not running tush below
+tush_compare_output [incr ps_wc_out -1] "ps | wc"
+
+tush_multi_line_test {find . -name "*.exp" | xargs grep -hc global} "find | xargs"
+
+tush_multi_line_test "cat /proc/cpuinfo | grep processor | wc -l" "num cores"
+
+send "exit\n"
+wait

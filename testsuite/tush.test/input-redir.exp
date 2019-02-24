@@ -1,0 +1,12 @@
+tush_start
+global PROMPT
+
+set test "Input redirection"
+
+tush_multi_line_test "cat < site.exp" "cat < input"
+tush_multi_line_test "grep include < bins/hello.c" "grep needle < haystack"
+tush_multi_line_test "wc -c < config/unix.exp" "wc -c < file"
+tush_multi_line_test "sort -n < input/random-numbers.txt" "sort < numbers"
+
+send "exit\n"
+wait

@@ -1,0 +1,29 @@
+tush_start
+set test "Output redirection"
+
+proc compare_output_files {command name} {
+    global PROMPT
+
+    send "$command > output/test.tush\n"
+    system "$command > output/test.sh"
+
+    expect {
+	$PROMPT {
+	    if {[diff output/test.tush output/test.sh]} {
+		pass "redirect $name output"
+	    } else {
+		fail "redirect $name output"
+	    }
+	    system "rm output/test.tush output/test.sh"
+	}
+	timeout { fail "redirect $name output" }
+    }
+}
+
+compare_output_files "ls" "ls"
+compare_output_files "echo Testing A B C" "echo"
+compare_output_files "grep main < bins/hello.c" "grep"
+compare_output_files "cat < /dev/null" "cat /dev/null"
+
+send "exit\n"
+wait

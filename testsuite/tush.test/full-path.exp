@@ -1,0 +1,14 @@
+tush_start
+
+set test "Simple shell commands"
+
+send "/bin/ls\n"
+set num_columns [exec stty -a | grep columns | sed -e {s/.*columns \([0-9]*\);.*/\1/g}]
+set ls_out [exec /bin/ls -C --width $num_columns]
+tush_compare_output $ls_out "full path to ls"
+
+tush_multi_line_test "/bin/date" "full path to date"
+tush_multi_line_test "/usr/bin/uptime" "full path to uptime"
+
+send "exit\n"
+wait

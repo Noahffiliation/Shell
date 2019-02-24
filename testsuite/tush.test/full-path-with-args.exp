@@ -1,0 +1,10 @@
+tush_start
+
+set test "Simple shell commands (with arguments)"
+
+tush_multi_line_test "/bin/ls -l" "ls -l"
+tush_multi_line_test "/bin/echo Testing A B C" "echo"
+tush_multi_line_test "/bin/cat testsuite/lib/tush.exp site.exp" "cat"
+
+send "exit\n"
+wait

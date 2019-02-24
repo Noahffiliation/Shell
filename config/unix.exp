@@ -1,0 +1,31 @@
+proc tush_exit {} {}
+proc tush_version {} {}
+
+proc tush_start {} {
+    global tool
+    global spawn_id
+    global PROMPT
+
+    global timeout
+    set timeout 2
+
+    spawn "./${tool}"
+    expect {
+	-re $PROMPT {}
+    }
+}
+
+proc tush_compare_output {expected_out name} {
+    set esc_output [regsub -all "\n" $expected_out "\r\n"]
+    expect {
+	-re $esc_output { pass $name }
+	timeout { fail $name }
+    }
+}
+
+proc tush_multi_line_test {command name} {
+    send "$command\n"
+    set cmd_out [exec {*}$command]
+
+    tush_compare_output "$command\n$cmd_out" $name
+}

@@ -1,0 +1,42 @@
+tush_start
+global PROMPT
+
+set test "Background commands"
+
+proc test_sleeper {count name} {
+    global PROMPT
+
+    send "sleep 10 &\n"
+    expect {
+	$PROMPT {
+	    if {[string compare [exec ps -ef | grep "sleep 10" | wc -l] $count] == 0} {
+		pass "$name background process"
+	    } else {
+		fail "$name background process"
+	    }
+	}
+	timeout { fail "$name background process" }
+    }
+}
+
+#
+# The number of processes that match is 1+ the number of sleeps
+# because the ps will also match in addition to the sleeping processes
+# we are trying to match.
+#
+test_sleeper "2" "first"
+test_sleeper "3" "second"
+test_sleeper "4" "third"
+test_sleeper "5" "fourth"
+test_sleeper "6" "fifth"
+
+puts "waiting 10 seconds for background processes to complete"
+sleep 10
+if {[string compare [exec ps -ef | grep "sleep 10" | wc -l] "1"]} {
+    fail "background processes not completed"
+} else {
+    pass "background processes completed"
+}
+
+send "exit\n"
+wait

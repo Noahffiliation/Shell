@@ -1,0 +1,54 @@
+tush_start
+global PROMPT
+
+set test "Built-in commands"
+
+send "pwd\n"
+set dir [pwd]
+expect {
+    -re ${dir} { pass "initial pwd" }
+    timeout { fail "initial pwd" }
+}
+
+send "cd garbage\n"
+expect {
+    -nocase -re "no such file or directory" {
+	pass "bad directory for cd"
+    }
+    timeout { fail "bad directory for cd" }
+}
+
+send "cd site.exp/test\n"
+expect {
+    -nocase -re "not a directory" {
+	pass "component in dir path is not a directory"
+    }
+    timeout { fail "component in dir path is not a directory" }
+}
+
+send "cd /root\n"
+expect {
+    -nocase -re "permission denied" {
+	pass "cd to dir without permissions"
+    }
+    timeout { fail "cd to dir without permissions" }
+}
+
+send "cd /\n"
+expect $PROMPT
+sleep 0.1
+send "pwd\n"
+
+expect {
+    -re "\n/\r" { pass "cd /" }
+    timeout { fail "cd /" }
+}
+
+send "version\n"
+expect {
+    -re $NAME { pass "version" }
+    timeout { fail "version" }
+}
+
+send "exit\n"
+wait

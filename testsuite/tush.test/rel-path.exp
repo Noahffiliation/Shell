@@ -1,0 +1,20 @@
+tush_start
+
+set test "Simple shell commands (with no path)"
+
+tush_multi_line_test "ls -1" "ls -1"
+
+send "./bins/hello\n"
+expect {
+    -re "Hello World!" { pass "hello" }
+    timeout { fail "hello" }
+}
+
+send "echo Testing A B C\n"
+expect {
+    -re "\nTesting A B C\r" { pass "echo" }
+    timeout { fail "echo" }
+}
+
+send "exit\n"
+wait

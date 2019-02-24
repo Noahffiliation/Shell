@@ -1,0 +1,36 @@
+tush_start
+
+set test "Various errant commands"
+
+send "bins/no-exec-script.sh\n"
+expect {
+    -nocase -re "permission denied" {
+	pass "command without execute permissions"
+    }
+    timeout {
+	fail "command without execute permissions"
+    }
+}
+
+send "/dev/null\n"
+expect {
+    -nocase -re "permission denied" {
+	pass "command is not a regular file"
+    }
+    timeout {
+	fail "command is not a regular file"
+    }
+}
+
+send "bins/ASSIGN.COM\n"
+expect {
+    -nocase -re "exec format error" {
+	pass "command is a DOS executable"
+    }
+    timeout {
+	fail "command is a DOS executable"
+    }
+}
+
+send "exit\n"
+wait
