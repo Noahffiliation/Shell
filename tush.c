@@ -226,5 +226,6 @@ int main(int argc, char **argv) {
         else if (strcmp(cmd, "cd") == 0) cd(options);
         else run_command(cmd, options, inptr, outptr);
     }
+    
     return 0;
 }

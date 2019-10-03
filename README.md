@@ -1,21 +1,27 @@
 # Shell
 I implemented a shell in C that runs known commands with full and relative paths along with input and output redirection and background commands.
 
-## Build
-### Compile
-```bash
->>>gcc -o tush tush.c
+## Requirements
+- dejagnu for `runtest`
 ```
-### Run
+sudo apt install dejagnu
+```
+
+## Build
 ```bash
->>>./tush
+$ gcc -o tush tush.c
+```
+
+## Run
+```bash
+$ ./tush
 $ (Run commands here)
 ```
 
-### Run tests
+## Testing
 Run tests to ensure proper functionality
 ```bash
->>>runtest PROMPT=\\\$ NAME=nlindsey
+$ runtest PROMPT=\\\$ NAME=nlindsey
 ```
 
 ## Notes
