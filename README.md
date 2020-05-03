@@ -9,7 +9,7 @@ sudo apt install dejagnu
 
 ## Build
 ```bash
-$ gcc -o tush tush.c
+$ make
 ```
 
 ## Run
@@ -21,7 +21,7 @@ $ (Run commands here)
 ## Testing
 Run tests to ensure proper functionality
 ```bash
-$ runtest PROMPT=\\\$ NAME=nlindsey
+$ runtest PROMPT=\\\$ NAME=your-name-here
 ```
 
 ## Notes
