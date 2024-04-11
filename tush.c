@@ -28,7 +28,7 @@ int get_num_args(char *options) {
 // Execute a command by prepending the PATH to the given command
 void rel_path(char *cmd, char **args) {
     char *path = getenv("PATH");
-    char *cpy = malloc(sizeof(char) * strlen(path));
+    char *cpy = malloc(sizeof(char) * strlen(path) + 1);
     // Deep copy so we don't modify the PATH environment variable
     strcpy(cpy, path);
     char *full_path = malloc(sizeof(char) * 400);
