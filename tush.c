@@ -30,19 +30,21 @@ void rel_path(char *cmd, char **args) {
     char *path = getenv("PATH");
     char *cpy = malloc(sizeof(char) * strlen(path) + 1);
     // Deep copy so we don't modify the PATH environment variable
-    strcpy(cpy, path);
+    strncpy(cpy, path);
     char *full_path = malloc(sizeof(char) * 400);
     // Split PATH by : to get each variable
     char *token = strtok(cpy, ":");
     while (token != NULL) {
-        strcpy(full_path, token);
+        strncpy(full_path, token);
         // Concatenate a / and the command to build the full executable path
-        strcat(full_path, "/");
-        strcat(full_path, cmd);
+        strncat(full_path, "/");
+        strncat(full_path, cmd);
         execv(full_path, args);
         // Iterate to the next path in PATH
         token = strtok(NULL, ":");
     }
+    free(cpy);
+    free(full_path);
 }
 
 void cd(char* options) {
@@ -119,10 +121,12 @@ void piping(char *cmd, char *options) {
         if (strstr(cmd, "/") == NULL) rel_path(cmd, args);
         else execv(cmd, args);
     }
+    free(args);
 }
 
 // Runs given commands with optional arguments, as well as controls redirection
 void run_command(char *cmd, char *options, char *inptr, char* outptr) {
+    if (cmd == NULL || options == NULL || inptr == NULL || outptr == NULL) return;
     pid_t pid = fork();
     if (pid < 0) printf("Error forking\n");
     else if (pid == 0) {
@@ -131,7 +135,7 @@ void run_command(char *cmd, char *options, char *inptr, char* outptr) {
             int fdi;
             char *input;
             options = strtok(options, " ");
-            
+
             char *ws = strstr(inptr, " ");
             if (ws != NULL) {
                 *ws = '\0';
@@ -182,6 +186,7 @@ void run_command(char *cmd, char *options, char *inptr, char* outptr) {
             waitpid(pid, &status, 0);
         }
     }
+    free(args);
 }
 
 int main(int argc, char **argv) {
@@ -226,6 +231,6 @@ int main(int argc, char **argv) {
         else if (strcmp(cmd, "cd") == 0) cd(options);
         else run_command(cmd, options, inptr, outptr);
     }
-    
+
     return 0;
 }
