@@ -67,7 +67,18 @@ void piping(char *cmd, char *options) {
     int pipefd[2] = {0, 0};
     printf("pipe: %d\n", pipe(pipefd));
     char *out = strstr(options, "|");
-    *out= '\0';
+    if (out != NULL) {
+        *out = '\0';  // Null-terminate the string before the '|'
+        out += 2;     // Move the pointer past the '|' character
+        printf("cmd: %s\n", cmd);
+        printf("out: %s\n", out);
+        printf("options: %s\n", options);
+    } else {
+        // Handle the case where '|' is not found in options
+        printf("cmd: %s\n", cmd);
+        printf("out: (null)\n");
+        printf("options: %s\n", options);
+    }
     out = out+2;
     printf("cmd: %s\n", cmd);
     printf("out: %s\n", out);
@@ -202,7 +213,13 @@ int main(int argc, char **argv) {
         printf("$ ");
         getline(&line, &size, stdin);
         // Separate executable command from arguments
-        cmd = strtok(line, " \n");
+        if (line != NULL && *line != '\0') {
+            cmd = strtok(line, " \n");
+            // Use cmd safely here
+        } else {
+            // Handle the case where line is a null pointer or an empty string
+            // (e.g., print an error message or assign a default value to cmd)
+        }
         options = strtok(NULL, "\n");
         char *inptr;
         char *outptr;
