@@ -28,23 +28,28 @@ int get_num_args(char *options) {
 // Execute a command by prepending the PATH to the given command
 void rel_path(char *cmd, char **args) {
     char *path = getenv("PATH");
-    char *cpy = malloc(sizeof(char) * strlen(path) + 1);
-    // Deep copy so we don't modify the PATH environment variable
-    strncpy(cpy, path, strlen(path) + 1);
-    char *full_path = malloc(sizeof(char) * 400);
-    // Split PATH by : to get each variable
-    char *token = strtok(cpy, ":");
-    while (token != NULL) {
-        strncpy(full_path, token, strlen(token) + 1);
-        // Concatenate a / and the command to build the full executable path
-        strncat(full_path, "/", strlen("/") + 1);
-        strncat(full_path, cmd, strlen(cmd) + 1);
-        execv(full_path, args);
-        // Iterate to the next path in PATH
-        token = strtok(NULL, ":");
+    if (path == NULL) {
+        fprintf(stderr, "Error: PATH environment variable not set\n");
+        return;
     }
-    free(cpy);
-    free(full_path);
+
+    int PATH_MAX = 4096;
+    char full_path[PATH_MAX];
+    char *path_copy = strdup(path);
+    char *token, *saveptr;
+
+    token = strtok_r(path_copy, ":", &saveptr);
+    while (token != NULL) {
+        if (realpath(token, full_path) != NULL) {
+            strncat(full_path, "/", PATH_MAX - strlen(full_path) - 1);
+            strncat(full_path, cmd, PATH_MAX - strlen(full_path) - 1);
+            execvp(full_path, args);
+        }
+        token = strtok_r(NULL, ":", &saveptr);
+    }
+
+    free(path_copy);
+    fprintf(stderr, "Error: Command not found in PATH\n");
 }
 
 void cd(char* options) {
