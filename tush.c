@@ -30,15 +30,15 @@ void rel_path(char *cmd, char **args) {
     char *path = getenv("PATH");
     char *cpy = malloc(sizeof(char) * strlen(path) + 1);
     // Deep copy so we don't modify the PATH environment variable
-    strncpy(cpy, path);
+    strncpy(cpy, path, strlen(path) + 1);
     char *full_path = malloc(sizeof(char) * 400);
     // Split PATH by : to get each variable
     char *token = strtok(cpy, ":");
     while (token != NULL) {
-        strncpy(full_path, token);
+        strncpy(full_path, token, strlen(token) + 1);
         // Concatenate a / and the command to build the full executable path
-        strncat(full_path, "/");
-        strncat(full_path, cmd);
+        strncat(full_path, "/", strlen("/") + 1);
+        strncat(full_path, cmd, strlen(cmd) + 1);
         execv(full_path, args);
         // Iterate to the next path in PATH
         token = strtok(NULL, ":");
@@ -131,8 +131,8 @@ void piping(char *cmd, char *options) {
         printf("cmd: %s\n", cmd);
         if (strstr(cmd, "/") == NULL) rel_path(cmd, args);
         else execv(cmd, args);
+        free(args);
     }
-    free(args);
 }
 
 // Runs given commands with optional arguments, as well as controls redirection
@@ -190,6 +190,7 @@ void run_command(char *cmd, char *options, char *inptr, char* outptr) {
                 else if (errno == ENOEXEC) printf("exec format error\n");
             }
         }
+        free(args);
     } else {
         // Wait for background processes
         if (!(options != NULL && strstr(options, "&"))) {
@@ -197,7 +198,6 @@ void run_command(char *cmd, char *options, char *inptr, char* outptr) {
             waitpid(pid, &status, 0);
         }
     }
-    free(args);
 }
 
 int main(int argc, char **argv) {
