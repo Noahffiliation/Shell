@@ -198,7 +198,7 @@ void run_command(char *cmd, char *options, char *inptr, char *outptr) {
 int main(int argc, char **argv) {
   // Kill any existing background processes
   signal(SIGCHLD, cleanup);
-  char *cmd = NULL;
+  char *cmd = "";
   char *options;
   char *line = NULL;
   // Run shell until user exits
@@ -214,6 +214,7 @@ int main(int argc, char **argv) {
     } else {
       // Handle the case where line is a null pointer or an empty string
       // (e.g., print an error message or assign a default value to cmd)
+      cmd = "";
     }
     options = strtok(NULL, "\n");
     char *inptr = NULL;
