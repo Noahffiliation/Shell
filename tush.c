@@ -85,8 +85,10 @@ void execute_cmd(char *cmd, char *options) {
   // Iterate through any number of arguments
   if (options != NULL) {
     args[1] = strtok(options, " ");
+    char *saveptr;
+    args[1] = strtok_r(options, " ", &saveptr);
     for (int i = 2; i <= num_args; i++)
-      args[i] = strtok_r(NULL, " ");
+        args[i] = strtok_r(NULL, " ", &saveptr);
   }
   args[num_args + 1] = '\0';
   if (num_args > 0 && args[num_args] && strcmp(args[num_args], "&") == 0)
@@ -252,3 +254,4 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+
