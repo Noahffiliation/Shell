@@ -86,7 +86,7 @@ void execute_cmd(char *cmd, char *options) {
   if (options != NULL) {
     args[1] = strtok(options, " ");
     for (int i = 2; i <= num_args; i++)
-      args[i] = strtok(NULL, " ");
+      args[i] = strtok_r(NULL, " ");
   }
   args[num_args + 1] = '\0';
   if (num_args > 0 && args[num_args] && strcmp(args[num_args], "&") == 0)
