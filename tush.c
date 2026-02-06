@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-
 // Used to control input/output redirection
 int in;
 int out;
@@ -199,7 +198,7 @@ void run_command(char *cmd, char *options, char *inptr, char *outptr) {
 int main(int argc, char **argv) {
   // Kill any existing background processes
   signal(SIGCHLD, cleanup);
-  char *cmd;
+  char *cmd = NULL;
   char *options;
   char *line = NULL;
   // Run shell until user exits
@@ -217,8 +216,8 @@ int main(int argc, char **argv) {
       // (e.g., print an error message or assign a default value to cmd)
     }
     options = strtok(NULL, "\n");
-    char *inptr;
-    char *outptr;
+    char *inptr = NULL;
+    char *outptr = NULL;
     // Control for piping
     // if (options != NULL && strstr(options, "|") != NULL) {
     //     // printf("cmd: %s\n", cmd);
