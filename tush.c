@@ -46,8 +46,10 @@ void rel_path(char *cmd, char **args) {
     if (realpath(token, full_path) != NULL) {
       strncat(full_path, "/", PATH_MAX_VAR - strlen(full_path) - 1);
       strncat(full_path, cmd, PATH_MAX_VAR - strlen(full_path) - 1);
-      execvp(full_path, args);
-      perror("execvp");
+      if (access(full_path, X_OK) == 0) {
+        execvp(full_path, args);
+        perror("execvp");
+      }
     } else {
     }
     token = strtok_r(NULL, ":", &saveptr);
@@ -94,11 +96,11 @@ void execute_cmd(char *cmd, char *options) {
   args[0] = cmd;
   // Iterate through any number of arguments
   if (options != NULL) {
-    args[1] = strtok(options, " ");
     char *saveptr;
+
     // args[1] = strtok_r(options, " ", &saveptr); // Redundant?
-    // Note: logic in original code seems to call strtok, then strtok_r on same
-    // string. Ensure consistency.
+    // Note: logic in original code seems to call strtok, then strtok_r on
+    // same string. Ensure consistency.
     char *token = strtok_r(options, " ", &saveptr);
     if (token)
       args[1] = token;
@@ -125,7 +127,8 @@ void execute_cmd(char *cmd, char *options) {
   free(args);
 }
 
-// Runs given commands with optional arguments, as well as controls redirection
+// Runs given commands with optional arguments, as well as controls
+// redirection
 void run_command(char *cmd, char *options, char *inptr, char *outptr) {
   if (cmd == NULL)
     return;

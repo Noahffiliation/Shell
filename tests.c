@@ -140,6 +140,29 @@ void test_invalid_command() {
   assert_contains(output, "Command not found in PATH", "test_invalid_command");
 }
 
+void test_cd_home() {
+  char output[MAX_OUTPUT];
+  char *home = getenv("HOME");
+  if (home) {
+    run_tush("cd\npwd\nexit\n", output);
+    assert_contains(output, home, "test_cd_home");
+  } else {
+    printf("SKIPPED: test_cd_home (HOME not set)\n");
+  }
+}
+
+void test_multi_args() {
+  char output[MAX_OUTPUT];
+  run_tush("echo a b c\nexit\n", output);
+  assert_contains(output, "a b c", "test_multi_args");
+}
+
+void test_abs_path() {
+  char output[MAX_OUTPUT];
+  run_tush("/bin/echo hello\nexit\n", output);
+  assert_contains(output, "hello", "test_abs_path");
+}
+
 int main() {
   printf("Running tests...\n");
   test_version();
@@ -150,6 +173,9 @@ int main() {
   test_redirection_out();
   test_redirection_in();
   test_invalid_command();
+  test_cd_home();
+  test_multi_args();
+  test_abs_path();
   printf("All tests passed!\n");
   return 0;
 }
