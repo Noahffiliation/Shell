@@ -168,9 +168,9 @@ int main(int argc, char **argv) {
   char *cmd = "";
   char *options;
   char *line = NULL;
+  size_t size = 0;
   // Run shell until user exits
   while (1) {
-    size_t size;
     in = 0;
     out = 0;
     // Prompt for my shell
@@ -221,5 +221,6 @@ int main(int argc, char **argv) {
       run_command(cmd, options, inptr, outptr);
   }
 
+  free(line);
   return 0;
 }
