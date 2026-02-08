@@ -58,7 +58,15 @@ void rel_path(char *cmd, char **args) {
 }
 
 void cd(char *options) {
-  int result = chdir(options);
+  char *path = options;
+  if (path == NULL) {
+    path = getenv("HOME");
+  }
+  if (path == NULL) {
+    printf("cd: missing argument or HOME not set\n");
+    return;
+  }
+  int result = chdir(path);
   if (result != 0) {
     if (errno == ENOTDIR)
       printf("not a directory\n");
