@@ -36,17 +36,19 @@ void rel_path(char *cmd, char **args) {
     return;
   }
 
-  int PATH_MAX = 4096;
-  char full_path[PATH_MAX];
+  int PATH_MAX_VAR = 4096; // Rename to avoid macro conflict
+  char full_path[PATH_MAX_VAR];
   char *path_copy = strdup(path);
   char *token, *saveptr;
 
   token = strtok_r(path_copy, ":", &saveptr);
   while (token != NULL) {
     if (realpath(token, full_path) != NULL) {
-      strncat(full_path, "/", PATH_MAX - strlen(full_path) - 1);
-      strncat(full_path, cmd, PATH_MAX - strlen(full_path) - 1);
+      strncat(full_path, "/", PATH_MAX_VAR - strlen(full_path) - 1);
+      strncat(full_path, cmd, PATH_MAX_VAR - strlen(full_path) - 1);
       execvp(full_path, args);
+      perror("execvp");
+    } else {
     }
     token = strtok_r(NULL, ":", &saveptr);
   }
@@ -86,18 +88,24 @@ void execute_cmd(char *cmd, char *options) {
   if (options != NULL) {
     args[1] = strtok(options, " ");
     char *saveptr;
-    args[1] = strtok_r(options, " ", &saveptr);
+    // args[1] = strtok_r(options, " ", &saveptr); // Redundant?
+    // Note: logic in original code seems to call strtok, then strtok_r on same
+    // string. Ensure consistency.
+    char *token = strtok_r(options, " ", &saveptr);
+    if (token)
+      args[1] = token;
+
     for (int i = 2; i <= num_args; i++)
-        args[i] = strtok_r(NULL, " ", &saveptr);
+      args[i] = strtok_r(NULL, " ", &saveptr);
   }
   args[num_args + 1] = '\0';
   if (num_args > 0 && args[num_args] && strcmp(args[num_args], "&") == 0)
     args[num_args] = NULL;
 
   // Check to see if command has the full path
-  if (strstr(cmd, "/") == NULL)
+  if (strstr(cmd, "/") == NULL) {
     rel_path(cmd, args);
-  else {
+  } else {
     int result = execv(cmd, args);
     if (result != 0) {
       if (errno == EACCES)
@@ -110,52 +118,52 @@ void execute_cmd(char *cmd, char *options) {
 }
 
 // TODO: Finish implementing pipes
-void piping(char *cmd, char *options) {
-  int pipefd[2] = {0, 0};
-  printf("pipe: %d\n", pipe(pipefd));
-  char *out = strstr(options, "|");
-  if (out != NULL) {
-    *out = '\0'; // Null-terminate the string before the '|'
-    out += 2;    // Move the pointer past the '|' character
-    printf("cmd: %s\n", cmd);
-    printf("out: %s\n", out);
-    printf("options: %s\n", options);
-  } else {
-    // Handle the case where '|' is not found in options
-    printf("cmd: %s\n", cmd);
-    printf("out: (null)\n");
-    printf("options: %s\n", options);
-  }
-  out = out + 2;
-  printf("cmd: %s\n", cmd);
-  printf("out: %s\n", out);
-  printf("options: %s\n", options);
-  pid_t pid = fork();
-  if (pid < 0)
-    printf("Error forking\n");
-  else if (pid == 0) {
-    printf("CHILD\n");
-    dup2(pipefd[1], STDOUT_FILENO);
-    fprintf(stderr, "pipe[0]: %d\n", pipefd[0]);
-    fprintf(stderr, "pipe[1]: %d\n", pipefd[1]);
-    close(pipefd[1]);
-    printf("HERE\n");
-    close(pipefd[0]);
+// void piping(char *cmd, char *options) {
+//   int pipefd[2] = {0, 0};
+//   printf("pipe: %d\n", pipe(pipefd));
+//   char *out = strstr(options, "|");
+//   if (out != NULL) {
+//     *out = '\0'; // Null-terminate the string before the '|'
+//     out += 2;    // Move the pointer past the '|' character
+//     printf("cmd: %s\n", cmd);
+//     printf("out: %s\n", out);
+//     printf("options: %s\n", options);
+//   } else {
+//     // Handle the case where '|' is not found in options
+//     printf("cmd: %s\n", cmd);
+//     printf("out: (null)\n");
+//     printf("options: %s\n", options);
+//   }
+//   out = out + 2;
+//   printf("cmd: %s\n", cmd);
+//   printf("out: %s\n", out);
+//   printf("options: %s\n", options);
+//   pid_t pid = fork();
+//   if (pid < 0)
+//     printf("Error forking\n");
+//   else if (pid == 0) {
+//     printf("CHILD\n");
+//     dup2(pipefd[1], STDOUT_FILENO);
+//     fprintf(stderr, "pipe[0]: %d\n", pipefd[0]);
+//     fprintf(stderr, "pipe[1]: %d\n", pipefd[1]);
+//     close(pipefd[1]);
+//     printf("HERE\n");
+//     close(pipefd[0]);
 
-    execute_cmd(cmd, options);
-  } else {
-    printf("PARENT\n");
-    dup2(pipefd[0], STDIN_FILENO);
-    close(pipefd[0]);
-    close(pipefd[1]);
+//     execute_cmd(cmd, options);
+//   } else {
+//     printf("PARENT\n");
+//     dup2(pipefd[0], STDIN_FILENO);
+//     close(pipefd[0]);
+//     close(pipefd[1]);
 
-    execute_cmd(cmd, options);
-  }
-}
+//     execute_cmd(cmd, options);
+//   }
+// }
 
 // Runs given commands with optional arguments, as well as controls redirection
 void run_command(char *cmd, char *options, char *inptr, char *outptr) {
-  if (cmd == NULL || options == NULL || inptr == NULL || outptr == NULL)
+  if (cmd == NULL)
     return;
   pid_t pid = fork();
   if (pid < 0)
@@ -198,6 +206,7 @@ void run_command(char *cmd, char *options, char *inptr, char *outptr) {
 }
 
 int main(int argc, char **argv) {
+  setbuf(stdout, NULL);
   // Kill any existing background processes
   signal(SIGCHLD, cleanup);
   char *cmd = "";
@@ -208,10 +217,12 @@ int main(int argc, char **argv) {
     size_t size;
     // Prompt for my shell
     printf("$ ");
-    getline(&line, &size, stdin);
+    if (getline(&line, &size, stdin) == -1) {
+      break;
+    }
     // Separate executable command from arguments
     if (line != NULL && *line != '\0') {
-      cmd = strtok(line, " \n");
+      cmd = strtok(line, " \n\r");
       // Use cmd safely here
     } else {
       // Handle the case where line is a null pointer or an empty string
@@ -254,4 +265,3 @@ int main(int argc, char **argv) {
 
   return 0;
 }
-
