@@ -92,7 +92,7 @@ void execute_cmd(char *cmd, char *options) {
     num_args = get_num_args(options);
   }
   // Args include executable command, its arguments, and '\0'
-  char **args = malloc(sizeof(char *) * (num_args + 2));
+  char **args = calloc(num_args + 2, sizeof(char *));
   args[0] = cmd;
   // Iterate through any number of arguments
   if (options != NULL) {
@@ -192,11 +192,11 @@ int main(int argc, char **argv) {
     // Separate executable command from arguments
     if (line != NULL && *line != '\0') {
       cmd = strtok(line, " \n\r");
-      // Use cmd safely here
+      if (cmd == NULL) {
+        continue;
+      }
     } else {
-      // Handle the case where line is a null pointer or an empty string
-      // (e.g., print an error message or assign a default value to cmd)
-      cmd = "";
+      continue;
     }
     options = strtok(NULL, "\n");
     char *inptr = NULL;
